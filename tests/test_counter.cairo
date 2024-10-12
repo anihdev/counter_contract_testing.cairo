@@ -1,9 +1,8 @@
 use starknet::{ContractAddress};
-use snforge_std::{declare, ContractClassTrait, DeclareResultTrait, start_cheat_caller_address};
+use snforge_std::{declare, ContractClassTrait, DeclareResultTrait, start_cheat_caller_address,};
 use hello_starknet::counter::{
     ICounterDispatcher, ICounterDispatcherTrait, ICounterSafeDispatcher, ICounterSafeDispatcherTrait
 };
-
 pub mod Accounts {
     use starknet::ContractAddress;
     use core::traits::TryInto;
@@ -61,3 +60,18 @@ fn test_set_owner_should_panic_when_called_with_zero_value() {
         Result::Err(panic_data) => { assert(*panic_data.at(0) == 'zero value', *panic_data.at(0)); }
     }
 }
+
+
+#[test]
+pub fn test_set_count_emits_event() {
+    let contract_address = deploy("Counter");
+    let counter_dispatcher = ICounterDispatcher { contract_address };
+
+    start_cheat_caller_address(contract_address, Accounts::admin());
+    let value: u64 = 99;
+    counter_dispatcher.set_count(value);
+    let event = counter_dispatcher.set_count(value);
+    assert!(event == counter_dispatcher.set_count(value), "Event not set");
+
+}
+

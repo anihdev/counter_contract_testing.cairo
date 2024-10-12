@@ -17,10 +17,22 @@ pub mod Counter {
     use starknet::{get_caller_address};
 
     #[storage]
-    struct Storage {
+   pub struct Storage {
         count: u64,
         admin: ContractAddress
     }
+    #[event]
+    #[derive(Drop, starknet::Event)]
+    pub enum Event {
+        Counter_Set: Counter_Set,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct Counter_Set {
+       pub value: u64,
+       
+    }
+
 
     #[constructor]
     fn constructor(ref self: ContractState, admin_address: ContractAddress) {
@@ -37,6 +49,7 @@ pub mod Counter {
             assert(value > 0, 'zero value');
 
             self.count.write(self.count.read() + value);
+            self.emit(Counter_Set { value: value })
         }
 
         fn get_count(self: @ContractState) -> u64 {
